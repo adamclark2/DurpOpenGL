@@ -3,12 +3,18 @@
 */
 
 #include <SDL2/SDL.h>
-#include <OpenGL/gl3.h>
+#include <OpenGL/gl.h>
 #include <stdbool.h>
 
 SDL_Window* win;
 SDL_Surface* sur;
 SDL_GLContext* con;
+
+float tri[] = {
+   -1.0f, -1.0f, 0.0f,
+   1.0f, -1.0f, 0.0f,
+   0.0f,  1.0f, 0.0f,
+};
 
 void testenv_INIT(){
     SDL_Init(SDL_INIT_EVERYTHING);
@@ -26,22 +32,37 @@ void testenv_INIT(){
         printf("SDL doesn't work, sur == null\n");
     }
 
+    /*
     // Use OpenGL 3
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);*/
+
     con = SDL_GL_CreateContext(win);
 }
 
-void glDraw(){
-    glClearColor(0.0f, 1.0f, 0.0f, 0.0f);
-    glClear(GL_COLOR_BUFFER_BIT);      
+void simpleDraw(){
+   glClearColor(0.0f, 0.0f, 0.0f, 1.0f); // Set background color to black and opaque
+   glClear(GL_COLOR_BUFFER_BIT);         // Clear the color buffer
+ 
+   // Draw a Red 1x1 Square centered at origin
+   glBegin(GL_QUADS);              // Each set of 4 vertices form a quad
+      glColor3f(1.0f, 0.0f, 0.0f); // Red
+      glVertex2f(-0.5f, -0.5f);    // x, y
+      glVertex2f( 0.5f, -0.5f);
+      glVertex2f( 0.5f,  0.5f);
+      glVertex2f(-0.5f,  0.5f);
+   glEnd();
+ 
+   glFlush();  // Render now
 }
 
 void testenv_SDL(){
     int major = -1;
     int minor = -1;
-    glGetIntegerv(GL_MAJOR_VERSION, &major);
-    glGetIntegerv(GL_MINOR_VERSION, &minor);
+    //glGetIntegerv(GL_MAJOR_VERSION, &major);
+    //glGetIntegerv(GL_MINOR_VERSION, &minor);
 
     printf("\n"
            "Vendor:   [%s]\n" 
@@ -59,7 +80,6 @@ void testenv_SDL(){
         major
     );
 
-
     bool done = false;
     SDL_Event event;
     while(!done){
@@ -67,8 +87,8 @@ void testenv_SDL(){
         if(event.type == SDL_QUIT){
             done = true;
         } else {
-            glDraw();
-            SDL_GL_SwapWindow(win);      
+            simpleDraw();
+            SDL_GL_SwapWindow(win);    
         }
     }
 }
@@ -81,7 +101,7 @@ void destroy(){
 int main(int argc, char* argv[]){
     testenv_INIT();
     testenv_SDL();
-    destroy();
 
+    destroy();
     printf("DONE\n");
 }
